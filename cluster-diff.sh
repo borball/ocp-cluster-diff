@@ -25,10 +25,10 @@ namespaced_resources=(
 
 
 usage(){
-  echo "Usage: $0 -f kube1 -t kube2 -h"
-  echo "This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -f and -t"
+  echo "Usage: $0 -s kube1 -t kube2 -h"
+  echo "This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -s and -t"
 
-  echo "Example: $0 -f sno1.yaml -t sno2.yaml"
+  echo "Example: $0 -s sno1.yaml -t sno2.yaml"
 
   echo "Can set the diff compare mode to adjust the output of the comparison result:"
   echo "    export DIFF_OPTS=-y"
@@ -123,9 +123,9 @@ compare_namespaced_scoped_resources(){
 }
 
 
-while getopts "f:t:h" arg; do
+while getopts "s:t:h" arg; do
   case $arg in
-    f)
+    s)
       echo "Compare cluster source: ${OPTARG}"
       c1=${OPTARG}
       if [ ! -f "$c1" ]; then

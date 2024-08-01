@@ -2,9 +2,9 @@
 
 ```shell
 # ./diff.sh -h
-Usage: ./diff.sh -f kube1 -t kube2 -h
+Usage: ./cluster-diff.sh -s kube1 -t kube2 -h
 This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -f and -t
-Example: ./diff.sh -f sno1.yaml -t sno2.yaml
+Example: ./cluster-diff.sh -s sno1.yaml -t sno2.yaml
 Can set the diff compare mode to adjust the output of the comparison result:
     export DIFF_OPTS=-y
     export DIFF_OPTS=--suppress-common-lines -W 270 --color -y
@@ -17,7 +17,7 @@ Make sure the server you run the script has the access with oc commands to the 2
 ## Example 1
 
 ```shell
-# ./diff.sh -f /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml -t /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
+# ./cluster-diff.sh -s /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml -t /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
 Compare cluster source: /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml
 Compare cluster target: /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
 Compare cluster-scoped resources:
@@ -525,7 +525,7 @@ spec:																	spec:
 
 ```shell
 # export DIFF_OPTS="--suppress-common-lines -W $(( $(tput cols) - 2 )) --color -y"
-# ./diff.sh -f /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml -t /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
+# ./diff.sh -s /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml -t /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
 Compare cluster source: /root/workload-enablement/kubeconfigs/kubeconfig-sno131.yaml
 Compare cluster target: /root/workload-enablement/kubeconfigs/kubeconfig-sno132.yaml
 Compare cluster-scoped resources:
