@@ -1,14 +1,17 @@
 #!/bin/bash
 
 cluster_scoped_resources=(
-"performanceprofiles.performance.openshift.io"
+"clusterversion version"
+"nodes.config.openshift.io cluster"
+"containerruntimeconfigs"
+"performanceprofiles"
 "networks.operator.openshift.io cluster .spec.disableNetworkDiagnostics"
-"OperartorHub cluster"
 "mc container-mount-namespace-and-kubelet-conf-master"
 "mc 07-sriov-related-kernel-args-master"
 "mc 08-set-rcu-normal-master"
 "mc 99-crio-disable-wipe-master"
 "mc 99-sync-time-once-master"
+
 )
 
 namespaced_resources=(
@@ -17,37 +20,29 @@ namespaced_resources=(
   "openshift-operator-lifecycle-manager cm collect-profiles-config"
   "openshift-marketplace catalogsource redhat-operators"
   "openshift-marketplace catalogsource certified-operators"
-
+  "openshift-ptp ptpconfig"
 )
 
+
 usage(){
-  echo "The script will compare 2 OpenShift clusters."
-  echo "Usage: $0 kubeconfig_file1 kubeconfig_file2"
-  echo "Example: $0 kubeconfig-sno1.yaml kubeconfig-sno2.yaml"
+  echo "Usage: $0 -f kube1 -t kube2 -h"
+  echo "This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -f and -t"
+
+  echo "Example: $0 -f sno1.yaml -t sno2.yaml"
+
+  echo "Can set the diff compare mode to adjust the output of the comparison result:"
+  echo "    export DIFF_OPTS=-y"
+  echo "    export DIFF_OPTS=\"--suppress-common-lines -W \$(( \$(tput cols) - 2 )) --color -y\""
+  echo "    export DIFF_OPTS=--color"
+  echo "The default DIFF_OPTS is: \"-W \$(( \$(tput cols) - 2 )) --color -y\""
+  echo
+  echo "Make sure the server you run the script has the access with oc commands to the 2 clusters."
 }
-
-
-if [ $# -lt 2 ]
-then
-  usage
-  exit
-fi
-
-if [[ ( $@ == "--help") ||  $@ == "-h" ]]
-then
-  usage
-  exit
-fi
-
-oc1="oc --kubeconfig=$1"
-oc2="oc --kubeconfig=$2"
 
 compare_cluster_scoped_resources(){
   crd=$1
   name=$2
   jsonpath=$3
-
-  echo "Diff $crd $name"
 
   if [ -n "$name" ]; then
     source_file="source-$crd-$name.yaml"
@@ -77,25 +72,41 @@ compare_cluster_scoped_resources(){
   yq -i -P 'sort_keys(..)' "$source_file"
   yq -i -P 'sort_keys(..)' "$target_file"
 
-  diff --color -y "$source_file" "$target_file"
+  echo "Diff $crd:$name: $DIFF $source_file $target_file"
+  echo ------------------------------------------------------------------------------------------------
+  $DIFF "$source_file" "$target_file"
+  echo ------------------------------------------------------------------------------------------------
+
 }
 
 compare_namespaced_scoped_resources(){
   ns=$1
   crd=$2
   name=$3
-
-  echo "Diff $ns $crd $name"
+  jsonpath=$4
 
   source_file="source-$ns-$crd-$name.yaml"
   target_file="target-$ns-$crd-$name.yaml"
 
-  if [ -n "$4" ]; then
-    $oc1 get -n "$ns" "$crd" "$name" -o yaml |yq "$4" > "$source_file"
-    $oc2 get -n "$ns" "$crd" "$name" -o yaml |yq "$4" > "$target_file"
+  if [ -n "$name" ]; then
+    source_file="source-$ns-$crd-$name.yaml"
+    target_file="target-$ns-$crd-$name.yaml"
   else
-    $oc1 get -n "$ns" "$crd" "$name" -o yaml > "$source_file"
-    $oc2 get -n "$ns" "$crd" "$name" -o yaml > "$target_file"
+    source_file="source-$ns-$crd.yaml"
+    target_file="target-$ns-$crd.yaml"
+  fi
+
+  if [ -z "$name" ]; then
+    $oc1 get -n "$ns" "$crd" -o yaml |yq ".items[0]" > "$source_file"
+    $oc2 get -n "$ns" "$crd" -o yaml |yq ".items[0]" > "$target_file"
+  else
+    if [ -n "$jsonpath" ]; then
+      $oc1 get -n "$ns" "$crd" "$name" -o yaml | yq "$jsonpath" > "$source_file"
+      $oc2 get -n "$ns" "$crd" "$name" -o yaml | yq "$jsonpath" > "$target_file"
+    else
+      $oc1 get -n "$ns" "$crd" "$name" -o yaml > "$source_file"
+      $oc2 get -n "$ns" "$crd" "$name" -o yaml > "$target_file"
+    fi
   fi
 
   yq -i 'del(.status)|.metadata |= with_entries(select(.key == "name" or .key == "namespace"))' "$source_file"
@@ -104,27 +115,59 @@ compare_namespaced_scoped_resources(){
   yq -i -P 'sort_keys(..)' "$source_file"
   yq -i -P 'sort_keys(..)' "$target_file"
 
-  diff --color -y "$source_file" "$target_file"
+  echo "Diff $ns/$crd:$name: $DIFF $source_file $target_file"
+  echo ------------------------------------------------------------------------------------------------
+  $DIFF "$source_file" "$target_file"
+  echo ------------------------------------------------------------------------------------------------
+
 }
 
 
-if [ -f $1 ] && [ -f $2 ]; then
-  echo "Compare cluster-scoped resources"
-  while read crd name jsonpath; do
-    compare_cluster_scoped_resources "$crd" "$name" "$jsonpath"
-    echo ------------------------------------------------------------------------------------------------
-    echo
-  done < <(printf '%s\n' "${cluster_scoped_resources[@]}")
+while getopts "f:t:h" arg; do
+  case $arg in
+    f)
+      echo "Compare cluster source: ${OPTARG}"
+      c1=${OPTARG}
+      if [ ! -f "$c1" ]; then
+        echo "file $c1 not exist, please check"
+        exit -1
+      fi
+      ;;
+    t)
+      echo "Compare cluster target: ${OPTARG}"
+      c2=${OPTARG}
+      if [ ! -f "$c2" ]; then
+        echo "file $c2 not exist, please check"
+        exit -1
+      fi
+      ;;
+    h | *) # Display help.
+      usage
+      exit 0
+      ;;
+  esac
+done
 
+oc1="oc --kubeconfig=$c1"
+oc2="oc --kubeconfig=$c2"
 
-  while read ns crd name jsonpath; do
-    echo "Compare namespace-scoped resources"
-    compare_namespaced_scoped_resources $ns $crd $name $jsonpath
-    echo ------------------------------------------------------------------------------------------------
-    echo
-  done < <(printf '%s\n' "${namespaced_resources[@]}")
-
+if [ -n "$DIFF_OPTS" ]; then
+  DIFF="diff $DIFF_OPTS"
 else
-  echo "$1 or $2 not exist, please check"
-  exit -1
+  DIFF="diff -W $(( $(tput cols) - 2 )) --color -y $source_file $target_file"
 fi
+
+
+echo "Compare cluster-scoped resources:"
+echo
+while read crd name jsonpath; do
+  compare_cluster_scoped_resources "$crd" "$name" "$jsonpath"
+  echo
+done < <(printf '%s\n' "${cluster_scoped_resources[@]}")
+
+while read ns crd name jsonpath; do
+  echo "Compare namespace-scoped resources"
+  compare_namespaced_scoped_resources $ns $crd $name $jsonpath
+  echo
+done < <(printf '%s\n' "${namespaced_resources[@]}")
+
