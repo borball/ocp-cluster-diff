@@ -7,11 +7,11 @@ cluster_scoped_resources=(
 "performanceprofiles"
 "networks.operator.openshift.io cluster .spec.disableNetworkDiagnostics"
 "mc container-mount-namespace-and-kubelet-conf-master"
+"mc 06-kdump-enable-master"
 "mc 07-sriov-related-kernel-args-master"
 "mc 08-set-rcu-normal-master"
 "mc 99-crio-disable-wipe-master"
 "mc 99-sync-time-once-master"
-
 )
 
 namespaced_resources=(
@@ -21,6 +21,8 @@ namespaced_resources=(
   "openshift-marketplace catalogsource redhat-operators"
   "openshift-marketplace catalogsource certified-operators"
   "openshift-ptp ptpconfig"
+  "openshift-ptp ptpoperatorconfig"
+  "openshift-sriov-network-operator SriovOperatorConfig"
 )
 
 
