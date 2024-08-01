@@ -1,18 +1,16 @@
 ## Usage
 
 ```shell
-# ./diff.sh -h
 Usage: ./cluster-diff.sh -s kube1 -t kube2 -h
-This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -f and -t
+This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -s and -t
 Example: ./cluster-diff.sh -s sno1.yaml -t sno2.yaml
 Can set the diff compare mode to adjust the output of the comparison result:
     export DIFF_OPTS=-y
-    export DIFF_OPTS=--suppress-common-lines -W 270 --color -y
+    export DIFF_OPTS="--suppress-common-lines -W $(( $(tput cols) - 2 )) --color -y"
     export DIFF_OPTS=--color
-The default DIFF_OPTS is: -W 270 --color -y
+The default DIFF_OPTS is: "-W $(( $(tput cols) - 2 )) --color -y"
 
-Make sure the server you run the script has the access with oc commands to the 2 clusters.
-```
+Make sure the server you run the script has the access with oc commands to the 2 clusters.```
 
 ## Example 1
 
