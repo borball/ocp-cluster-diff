@@ -10,7 +10,8 @@ Can set the diff compare mode to adjust the output of the comparison result:
     export DIFF_OPTS=--color
 The default DIFF_OPTS is: "-W $(( $(tput cols) - 2 )) --color -y"
 
-Make sure the server you run the script has the access with oc commands to the 2 clusters.```
+Make sure the server you run the script has the access with oc commands to the 2 clusters.
+```
 
 ## Example 1
 
