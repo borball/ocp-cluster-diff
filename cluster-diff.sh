@@ -28,9 +28,10 @@ namespaced_resources=(
 
 usage(){
   echo "Usage: $0 -s kube1 -t kube2 -h"
-  echo "This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files with -s and -t"
+  echo "This will compare pre-defined custom resources on 2 clusters specified by kubeconfig files or k8s context with -s and -t"
 
   echo "Example: $0 -s sno1.yaml -t sno2.yaml"
+  echo "Example: $0 -s cluster1 -t cluster2"
 
   echo "Can set the diff compare mode to adjust the output of the comparison result:"
   echo "    export DIFF_OPTS=-y"
@@ -130,17 +131,23 @@ while getopts "s:t:h" arg; do
     s)
       echo "Compare cluster source: ${OPTARG}"
       c1=${OPTARG}
-      if [ ! -f "$c1" ]; then
-        echo "file $c1 not exist, please check"
-        exit -1
+      if [ -f "$c1" ]; then
+        echo "file $c1 exists, will use it as kubeconfig"
+        oc1="oc --kubeconfig=$c1"
+      else
+        echo "file $c1 not exist, will use it as context"
+        oc1="oc --context=$c1"
       fi
       ;;
     t)
       echo "Compare cluster target: ${OPTARG}"
       c2=${OPTARG}
-      if [ ! -f "$c2" ]; then
-        echo "file $c2 not exist, please check"
-        exit -1
+      if [ -f "$c2" ]; then
+        echo "file $c2 exists, will use it as kubeconfig"
+        oc2="oc --kubeconfig=$c2"
+      else
+        echo "file $c2 not exist, will use it as context"
+        oc2="oc --context=$c2"
       fi
       ;;
     h | *) # Display help.
@@ -149,9 +156,6 @@ while getopts "s:t:h" arg; do
       ;;
   esac
 done
-
-oc1="oc --kubeconfig=$c1"
-oc2="oc --kubeconfig=$c2"
 
 if [ -n "$DIFF_OPTS" ]; then
   DIFF="diff $DIFF_OPTS"
