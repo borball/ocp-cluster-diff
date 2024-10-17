@@ -1,30 +1,7 @@
 #!/bin/bash
 
-cluster_scoped_resources=(
-  "clusterversion version"
-  "nodes.config.openshift.io cluster"
-  "containerruntimeconfigs"
-  "performanceprofiles"
-  "networks.operator.openshift.io cluster .spec.disableNetworkDiagnostics"
-  "mc container-mount-namespace-and-kubelet-conf-master"
-  "mc 06-kdump-enable-master"
-  "mc 07-sriov-related-kernel-args-master"
-  "mc 08-set-rcu-normal-master"
-  "mc 99-crio-disable-wipe-master"
-  "mc 99-sync-time-once-master"
-)
-
-namespaced_resources=(
-  "openshift-cluster-node-tuning-operator tuned performance-patch"
-  "openshift-monitoring cm cluster-monitoring-config"
-  "openshift-operator-lifecycle-manager cm collect-profiles-config"
-  "openshift-marketplace catalogsource redhat-operators"
-  "openshift-marketplace catalogsource certified-operators"
-  "openshift-ptp ptpconfig"
-  "openshift-ptp ptpoperatorconfig"
-  "openshift-sriov-network-operator SriovOperatorConfig"
-)
-
+basedir="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+source $basedir/resources.cfg
 
 usage(){
   echo "Usage: $0 -s kube1 -t kube2 -h"
