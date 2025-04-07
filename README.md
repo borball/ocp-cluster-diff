@@ -25,4 +25,4 @@ diff.sh cluster1-must-gather cluster2-must-gather
 
 ### Demo
 
-[diff](diff.jpg)
+![demo](diff.jpg "cluster diff")
