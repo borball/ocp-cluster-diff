@@ -1,5 +1,5 @@
 FROM registry.ci.openshift.org/ocp/builder:rhel-9-golang-1.22-openshift-4.18 AS builder
-WORKDIR /go/src/github.com/openshift/must-gather
+WORKDIR /go/src/github.com/borball/ocp-cluster-diff
 COPY . .
 ENV GO_PACKAGE github.com/openshift/must-gather
 
