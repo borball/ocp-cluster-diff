@@ -64,7 +64,7 @@ compare(){
       rel_path="namespaces/$rel_path"
     fi
 
-    source_cr="$(find )"
+    source_cr="$source_dir/$rel_path"
     target_cr="$target_dir/$rel_path"
 
     exists_source="yes"
