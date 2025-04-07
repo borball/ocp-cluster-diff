@@ -7,5 +7,5 @@ FROM registry.ci.openshift.org/ocp/4.18:cli
 
 LABEL io.k8s.display-name="vdu-caas-must-gather" \
       io.k8s.description="This is a must-gather image that collects important vDU required & tuned resources."
-COPY --from=builder /go/src/github.com/borball/vdu-caas-must-gather/collection-scripts/* /usr/bin/
+COPY --from=builder /go/src/github.com/borball/ocp-cluster-diff/collection-scripts/* /usr/bin/
 RUN chmod +x /usr/bin/gather

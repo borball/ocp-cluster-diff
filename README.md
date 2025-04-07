@@ -12,9 +12,9 @@ In this repo, we built and published the image here quay.io/bzhai/caas-vdu-must-
 
 ```shell
 # cluster 1
-oc adm must-gather --image=quay.io/bzhai/caas-vdu-must-gather:4.18 --dest-dir cluster1-must-gather
+oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.18 --dest-dir cluster1-must-gather
 # cluster 2
-oc adm must-gather --image=quay.io/bzhai/caas-vdu-must-gather:4.18 --dest-dir cluster2-must-gather
+oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.18 --dest-dir cluster2-must-gather
 ```
 
 ### Compare
