@@ -22,3 +22,7 @@ oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.18 --dest-dir cl
 ```shell
 diff.sh cluster1-must-gather cluster2-must-gather
 ```
+
+### Demo
+
+[diff](diff.jpg)

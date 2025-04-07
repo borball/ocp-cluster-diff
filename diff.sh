@@ -1,8 +1,6 @@
 #!/bin/bash
 
 basedir="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-source $basedir/resources.cfg
-
 
 usage(){
   echo "Usage: $0 source-must-gather-dir> <target-must-gather-dir"
@@ -23,8 +21,16 @@ info(){
   printf  $(tput setaf 2)"%-148s %-10s %-10s %-50s"$(tput sgr0)"\n" "$@"
 }
 
+title(){
+  printf  $(tput setaf 4)"%-148s %-10s %-10s %-50s"$(tput sgr0)"\n" "$@"
+}
+
 warn(){
   printf  $(tput setaf 3)"%-148s %-10s %-10s %-50s"$(tput sgr0)"\n" "$@"
+}
+
+red(){
+  printf  $(tput setaf 1)"%-148s %-10s %-10s %-50s"$(tput sgr0)"\n" "$@"
 }
 
 
@@ -33,7 +39,9 @@ del(.metadata.creationTimestamp) |
 del(.metadata.resourceVersion) |
 del(.metadata.annotations) |
 del(.metadata.uid) |
+del(.metadata.generation) |
 del(.status) |
+del(.metadata.ownerReferences) |
 del(.spec.clusterID) |
 del(.metadata.managedFields)
 '
@@ -45,14 +53,13 @@ random_name(){
 compare(){
   echo "Compare all resources between $source_dir and $target_dir, following is the report:"
   echo
-  echo "---------------------------------------------------------------"
   report_dir="$basedir/cluster-diff-$(date +%Y%m%d%H%M%S)"
   mkdir -p "${report_dir}"
 
   local tmp_dir=$(mktemp -d)
   #trap 'rm -rf "${tmp_dir}"' EXIT
 
-  info "File" "S" "T" "Diff"
+  title "File" "S" "T" "Diff"
   find "$source_dir" "$target_dir" \( -wholename '*cluster-scoped-resources/*.yaml' -o -wholename '*namespaces/*.yaml' \) -printf "%P\n" | sort | uniq | while IFS= read -r file; do
     rel_path="${file#*cluster-scoped-resources/}"
     rel_path="${rel_path#*namespaces/}"
@@ -64,19 +71,24 @@ compare(){
       rel_path="namespaces/$rel_path"
     fi
 
-    source_cr="$source_dir/$rel_path"
-    target_cr="$target_dir/$rel_path"
+    source_root_dir="$(find $source_dir -type d -name cluster-scoped-resources)"
+    source_root_dir="${source_root_dir/cluster-scoped-resources//}"
+    target_root_dir="$(find $target_dir -type d -name cluster-scoped-resources)"
+    target_root_dir="${target_root_dir/cluster-scoped-resources//}"
+
+    source_cr="$source_root_dir/$rel_path"
+    target_cr="$target_root_dir/$rel_path"
 
     exists_source="yes"
     exists_target="yes"
 
     if [ ! -f "$source_cr" ]; then
-      warn "$rel_path" "No" "Yes" "$target_dir/"
+      red "$rel_path" "No" "Yes" "$target_dir/"
       exists_source="no"
     fi
 
     if [ ! -f "$target_cr" ]; then
-      warn "$rel_path" "Yes" "No" "$source_dir/"
+      red "$rel_path" "Yes" "No" "$source_dir/"
       exists_target="no"
     fi
 
@@ -115,5 +127,3 @@ source_dir=$1
 target_dir=$2
 
 compare
-
-
