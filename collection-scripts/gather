@@ -1,0 +1,16 @@
+#!/bin/bash
+
+must_gather_dir=${1:-must-gather}
+basedir="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+source "$basedir/resources.cfg"
+
+for cr in "${cluster_scoped_resources[@]}"; do
+  /usr/bin/oc adm inspect --dest-dir "$must_gather_dir" "$cr"
+done
+
+while read ns cr; do
+  /usr/bin/oc adm inspect --dest-dir "$must_gather_dir" -n $ns $cr
+  echo
+done < <(printf '%s\n' "${namespaced_resources[@]}")
+
+exit 0
