@@ -52,12 +52,18 @@ random_name(){
 
 compare(){
   echo "Compare all resources between $source_dir and $target_dir, following is the report:"
-  echo
   report_dir="$basedir/cluster-diff-$(date +%Y%m%d%H%M%S)"
   mkdir -p "${report_dir}"
 
   local tmp_dir=$(mktemp -d)
   #trap 'rm -rf "${tmp_dir}"' EXIT
+  echo "***************************************************************************************"
+  echo "***** File: location inside the must-gather folder"
+  echo "***** S:    if the file exists in source-dir"
+  echo "***** T:    if the file exists in target-dir"
+  echo "***** Diff: diff file if there is any, use 'cat' command to see the detailed difference"
+  echo "***************************************************************************************"
+  echo "---------------------------------------------------------------------------------------"
 
   title "File" "S" "T" "Diff"
   find "$source_dir" "$target_dir" \( -wholename '*cluster-scoped-resources/*.yaml' -o -wholename '*namespaces/*.yaml' \) -printf "%P\n" | sort | uniq | while IFS= read -r file; do
