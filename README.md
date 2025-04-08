@@ -30,3 +30,46 @@ diff.sh cluster1-must-gather cluster2-must-gather
 ### Demo
 
 ![demo](diff.jpg "cluster diff")
+
+
+### Extend
+
+You can update the file [resources.cfg](collection-scripts/resources.cfg) to add/remove resoures:
+```shell
+
+cluster_scoped_resources=(
+  "clusterversion/version"
+  "containerruntimeconfigs"
+  "performanceprofiles"
+  "networks.operator.openshift.io/cluster"
+  "mc/container-mount-namespace-and-kubelet-conf-master"
+  "mc/06-kdump-enable-master"
+  "mc/07-sriov-related-kernel-args-master"
+  "mc/08-set-rcu-normal-master"
+  "mc/99-crio-disable-wipe-master"
+  "mc/99-sync-time-once-master"
+)
+
+namespaced_resources=(
+  "openshift-cluster-node-tuning-operator tuned"
+  "openshift-monitoring cm/cluster-monitoring-config"
+  "openshift-operator-lifecycle-manager cm/collect-profiles-config"
+  "openshift-marketplace catalogsource/redhat-operators"
+  "openshift-marketplace catalogsource/certified-operators"
+  "openshift-ptp ptpconfig"
+  "openshift-ptp ptpoperatorconfig"
+  "openshift-sriov-network-operator SriovOperatorConfig"
+)
+
+```
+
+then modify .env so that you can build and publish the image to your own registry:
+
+```
+DOCKER_IMAGE=<your_registry>/vdu-caas-must-gather
+DOCKER_TAG=4.18
+```
+
+```shell
+make podman_build podman_publish
+```
