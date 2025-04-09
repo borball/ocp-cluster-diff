@@ -8,15 +8,15 @@ image can/shall be used in this repo.
 Update the [resources.cfg](collection-scripts/resources.cfg) based on your needs to if you need to compare additional resources. Build the 
 image and publish it to your registry so that you can fetch the cluster data accordingly. 
 
-In this repo, we built and published the image to quay.io/bzhai/caas-vdu-must-gather:4.18
+In this repo, we built and published the image to quay.io/bzhai/caas-vdu-must-gather:4.16
 
 To generate a custom must-gather, run command below towards the clusters you want to compare:
 
 ```shell
 # cluster 1
-oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.18 --dest-dir cluster1-must-gather
+oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.16 --dest-dir cluster1-must-gather
 # cluster 2
-oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.18 --dest-dir cluster2-must-gather
+oc adm must-gather --image=quay.io/bzhai/vdu-caas-must-gather:4.16 --dest-dir cluster2-must-gather
 ```
 
 ### Compare
@@ -67,7 +67,7 @@ then modify .env so that you can build and publish the image to your own registr
 
 ```
 DOCKER_IMAGE=<your_registry>/vdu-caas-must-gather
-DOCKER_TAG=4.18
+DOCKER_TAG=4.16
 ```
 
 ```shell
