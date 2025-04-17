@@ -59,6 +59,9 @@ namespaced_resources=(
   "openshift-ptp ptpconfig"
   "openshift-ptp ptpoperatorconfig"
   "openshift-sriov-network-operator SriovOperatorConfig"
+  "openshift-sriov-network-operator SriovNetwork"
+  "openshift-sriov-network-operator SriovNetworkNodePolicy"
+  "openshift-local-storage LocalVolumeSet"
 )
 
 ```
